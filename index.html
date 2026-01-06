@@ -266,9 +266,134 @@
         <div id="content"></div>
     </div>
 
+    <!-- Embedded Content: Chinese -->
+    <script id="raw-zh" type="text/markdown">
+# 產品需求文件 (PRD)
+
+## 1. 產品願景 (Vision)
+建立一個專業且具個人特色的 Personal AI Portfolio 網站，透過**類似 Apple 官網的極簡質感設計與流暢的高品質動畫**，向潛在雇主與技術合作夥伴展示個人的 AI 開發能力、專案成果以及專業背景。
+
+## 2. 使用者人物誌 (Target Persona)
+### 主要目標客群：招聘經理 (Hiring Manager) / 技術面試官
+- **特徵**：時間寶貴，注重候選人的實際產出與技術深度，同時欣賞高品質的設計細節。
+- **痛點**：瀏覽大量履歷令人疲乏，希望能快速找到候選人的亮點與實作能力證明。
+- **需求**：需要一個能快速了解候選人「是誰」以及「做過什麼」的入口，並被高品質的呈現方式所吸引。
+
+### 次要目標客群：潛在合作夥伴 / 一般訪客
+- **特徵**：對 AI 技術感興趣，尋找合作機會或靈感。
+- **需求**：清晰的作品展示、令人印象深刻的視覺體驗與簡單的聯繫方式。
+
+## 3. 視覺設計 (Visual Design)
+
+![UI Wireframe](../assets/wireframe_00001.jpg)
+
+本專案將採用極簡主義 (Minimalism) 與高質感設計，透過以下策略實作：
+
+*   **版面佈局 (Layout)**：採用寬螢幕置中設計，給予標題與關鍵內容大量留白 (Negative Space)，引導視覺焦點。
+*   **組件風格 (Components)**：運用毛玻璃效果 (Glassmorphism) 於導覽列與卡片元素，呈現輕透與現代感。
+*   **字體設計 (Typography)**：選用高識別度且優雅的無襯線字體，透過字級與字重的強烈對比建立清晰的資訊層級。
+*   **動畫展演 (Animation)**：實作細膩的滾動視差與元件進場動畫，營造流暢且生動的使用者體驗，呼應 Apple 官網的互動質感。
+
+## 4. 功能需求列表 (Feature List) - MoSCoW 排序
+
+### Must Have (必須有)
+- **首頁 (Landing Page)**：作為網站的主要入口，需呈現高質感的視覺衝擊。
+- **極簡質感設計 (Apple-like Minimalist Design)**：採用大量留白、精選字體與高解析度素材，營造尊榮且專業的氛圍。
+- **高品質動畫 (High-Quality Animations)**：包含平滑的轉場、滾動視差 (Parallax) 或微互動 (Micro-interactions)，提升使用者體驗但不可喧賓奪主。
+- **自我介紹區塊 (About Me Introduction)**：包含個人簡介、核心技能與職涯背景的摘要。
+- **作品集連結列表 (Portfolio Links)**：展示精選專案的標題與連結，點擊後可跳轉至專案詳情或外部演示連結。
+
+### Should Have (應該有)
+- **響應式設計 (Responsive Design)**：確保在桌面電腦、平板與手機上皆能良好顯示，並保持設計語言的一致性。
+- **社群媒體連結**：GitHub、LinkedIn 等專業社群的連結圖示，建議整合於頁尾或導覽列。
+
+### Could Have (可以有)
+- **詳細作品頁面**：每個作品有獨立的詳細說明頁面，包含技術堆疊與開發心得。
+- **聯絡表單**：讓訪客能直接透過網站寄送訊息。
+
+### Won't Have (本次不會有)
+- **後台管理系統 (CMS)**：初期內容直接寫在程式碼中 (Hardcoded) 或透過簡單的設定檔管理，不開發複雜的後台。
+- **使用者登入系統**：本站為公開展示用途，不需會員功能。
+
+## 5. 驗收標準 (Acceptance Criteria)
+1.  **首頁載入測試**：使用者進入網站首頁時，應在 3 秒內完成載入，並立即看到自我介紹內容（包含初始進場動畫）。
+2.  **視覺風格驗收**：整體介面應符合「極簡」、「高質感」的設計要求，無雜亂排版或不協調的配色。需經由使用者確認是否達到類似 Apple 官網的質感。
+3.  **動畫流暢度驗收**：
+    *   所有轉場與捲動動畫必須保持 60fps 的流暢度，無明顯卡頓。
+    *   在行動裝置上動畫需適度簡化或優化，避免過度消耗效能。
+4.  **內容正確性**：自我介紹文字需通順無誤，作品集連結需正確指向目標網頁，無無效連結 (Dead Links)。
+5.  **作品集導航**：點擊任一作品集連結，應能順利開啟新分頁或跳轉至對應頁面。
+6.  **版面適應性**：
+    *   在寬螢幕 (Desktop) 下，內容應置中或合理排版，不過度拉伸。
+    *   在手機螢幕 (Mobile) 下，內容應自動堆疊，文字大小適中易讀，無水平捲軸出現。
+    </script>
+
+    <!-- Embedded Content: English -->
+    <script id="raw-en" type="text/markdown">
+# Product Requirement Document (PRD)
+
+## 1. Product Vision
+To build a professional and personalized Personal AI Portfolio website, utilizing **Apple-like minimalist aesthetic design and smooth high-quality animations**, to demonstrate personal AI development capabilities, project achievements, and professional background to hiring managers and potential technical partners.
+
+## 2. Target Persona
+
+### Primary Audience: Hiring Manager / Technical Interviewer
+- **Characteristics**: Time-poor, values actual output and technical depth, while appreciating high-quality design details.
+- **Pain Points**: Fatigued by reviewing a large volume of resumes, hopes to quickly find the candidate's highlights and proof of practical ability.
+- **Needs**: Requires an entry point to quickly understand "who" the candidate is and "what they have done", and to be attracted by a high-quality presentation.
+
+### Secondary Audience: Potential Partner / General Visitor
+- **Characteristics**: Interested in AI technology, looking for collaboration opportunities or inspiration.
+- **Needs**: Clear project showcase, impressive visual experience, and simple contact information.
+
+## 3. Visual Design
+
+![UI Wireframe](../assets/wireframe_00001.jpg)
+
+This project will adopt Minimalism and high-quality design, implemented through the following strategies:
+
+*   **Layout**: Uses a wide-screen centered design, providing ample Negative Space for headings and key content to guide visual focus.
+*   **Components**: Utilizes Glassmorphism on the navigation bar and card elements to present a lightweight and modern feel.
+*   **Typography**: Selects highly recognizable and elegant sans-serif fonts, establishing a clear information hierarchy through strong contrast in font size and weight.
+*   **Animation**: Implements subtle parallax scrolling and element entrance animations to create a smooth and vivid user experience, echoing the interactive quality of Apple's official website.
+
+## 4. Feature List - MoSCoW Prioritization
+
+### Must Have
+- **Landing Page**: As the main entry point of the website, it must present a high-quality visual impact.
+- **Apple-like Minimalist Design**: Uses abundant white space, selected fonts, and high-resolution assets to create a prestigious and professional atmosphere.
+- **High-Quality Animations**: Includes smooth transitions, Parallax scrolling, or Micro-interactions to enhance user experience without overshadowing content.
+- **About Me Introduction**: Includes a summary of personal bio, core skills, and career background.
+- **Portfolio Links**: Displays titles and links of selected projects, jumping to project details or external demo links upon clicking.
+
+### Should Have
+- **Responsive Design**: Ensures good display on desktops, tablets, and mobile phones, maintaining consistent design language.
+- **Social Media Links**: Links to professional communities like GitHub and LinkedIn, recommended to be integrated into the footer or navigation bar.
+
+### Could Have
+- **Detailed Project Pages**: Independent detailed description pages for each project, including tech stack and development insights.
+- **Contact Form**: Allows visitors to send messages directly through the website.
+
+### Won't Have (Not included in this iteration)
+- **CMS (Content Management System)**: Initial content will be Hardcoded or managed via simple configuration files; no complex backend will be developed.
+- **User Login System**: This site is for public display purposes and does not require membership functions.
+
+## 5. Acceptance Criteria
+1.  **Homepage Load Test**: When a user enters the website homepage, it should complete loading within 3 seconds and immediately show the self-introduction content (including initial entrance animation).
+2.  **Visual Style Acceptance**: The overall interface should meet the "Minimalist" and "High Quality" design requirements, without cluttered layout or uncoordinated color schemes. It needs to be confirmed by the user that it achieves an Apple-like quality.
+3.  **Animation Smoothness Acceptance**:
+    *   All transitions and scrolling animations must maintain a smoothness of 60fps without noticeable lag.
+    *   Animations on mobile devices need to be moderately simplified or optimized to avoid excessive performance consumption.
+4.  **Content Accuracy**: Self-introduction text must be smooth and error-free, and portfolio links must correctly point to target web pages without Dead Links.
+5.  **Portfolio Navigation**: Clicking any portfolio link should successfully open a new tab or jump to the corresponding page.
+6.  **Layout Adaptability**:
+    *   On wide screens (Desktop), content should be centered or reasonably laid out without excessive stretching.
+    *   On mobile screens (Mobile), content should automatically stack, with text size moderate and easy to read, and no horizontal scrollbars appearing.
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Moved initialization logic to bottom to ensure functions are defined
+            // Initialization
         });
 
         function generateTOC() {
@@ -307,51 +432,31 @@
         // Default to 'zh' if not set
         let currentLang = localStorage.getItem('prd_lang') || 'zh';
 
-        // Map language code to file path
-        const langMap = {
-            'zh': './docs/PRD.md',
-            'en': './docs/PRD_en.md'
-        };
-
         function updateButtonText() {
-            // If current is 'zh', button should verify switching to 'en', so show 'EN'
-            // But usually toggle buttons show current state or target state. 
-            // The requirement says "EN / 中". Let's make it intuitive.
-            // If current is Chinese, show "Switch to English" or highlight "中".
-            // Let's stick to the text "EN / 中" but maybe change content based on state?
-            // Or just static "EN / 中"? The prompt says "例如顯示 'EN / 中'".
-            // Let's make it toggle: if zh -> Show "English", if en -> Show "中文"
             toggleBtn.textContent = currentLang === 'zh' ? 'English' : '中文';
         }
 
         function loadContent(lang) {
-            const filePath = langMap[lang];
+            const scriptId = `raw-${lang}`;
+            const scriptTag = document.getElementById(scriptId);
             const contentDiv = document.getElementById('content');
 
-            contentDiv.innerHTML = '<div id="loading">Loading...</div>'; // Simple loading state
+            if (!scriptTag) {
+                console.error(`Script tag #${scriptId} not found.`);
+                return;
+            }
 
-            fetch(filePath)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Could not load ${filePath}`);
-                    return response.text();
-                })
-                .then(text => {
-                    // 1. Path Correction
-                    const fixedText = text.replace(/\.\.\/assets\//g, 'assets/');
+            // Get text content from the script tag
+            const rawText = scriptTag.textContent.trim();
 
-                    // 2. Render Markdown
-                    contentDiv.innerHTML = marked.parse(fixedText);
+            // 1. Path Correction
+            const fixedText = rawText.replace(/\.\.\/assets\//g, 'assets/');
 
-                    // 3. Generate Sidebar TOC
-                    generateTOC();
-                })
-                .catch(err => {
-                    contentDiv.innerHTML = `<div style="color: #FF3B30; padding: 20px; text-align: center;">
-                        <h2>Error Loading Content</h2>
-                        <p>${err.message}</p>
-                    </div>`;
-                    console.error(err);
-                });
+            // 2. Render Markdown
+            contentDiv.innerHTML = marked.parse(fixedText);
+
+            // 3. Generate Sidebar TOC
+            generateTOC();
         }
 
         // Initial Load
