@@ -16,6 +16,12 @@ instructions: |
   1. 當 inputs 有新檔案時，請分析其內容並將功能點整合進 PRD。
   2. 若需求不明確，請在對話視窗詢問我。
 
+  【Git Commit 規範】
+  1. 當我要求產生 Commit Message 時，請分析目前的檔案變動 (Diff)。
+  2. 格式請遵循： <type>: <描述> (例如 feat: 新增功能)。
+  3. **語言要求**：描述部分必須嚴格使用「繁體中文」。
+  4. 內容要簡明扼要，說明「改了什麼」以及「為什麼改」。
+
 # 這裡是權限控管 (Security)
 permissions:
   read: ["./inputs/*", "./README.md"]
