@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品需求文件 (PRD)</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-color: #FBFBFD;
+            --text-color: #1D1D1F;
+            --sidebar-bg: #F5F5F7;
+            --border-color: #D2D2D7;
+            --accent-color: #0066CC;
+            --code-bg: #F5F5F7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Helvetica Neue", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        #sidebar h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #86868B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            padding-left: 10px;
+        }
+
+        #toc a {
+            display: block;
+            color: #424245;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        #toc a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: #1D1D1F;
+        }
+
+        #toc a.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        #toc .indent-1 {
+            padding-left: 10px;
+        }
+
+        #toc .indent-2 {
+            padding-left: 24px;
+        }
+
+        /* Main Content Styles */
+        #main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 60px 80px;
+            max-width: 960px;
+            margin-right: auto;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--text-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 40px;
+            letter-spacing: -0.01em;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 28px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 50px;
+        }
+
+        h3 {
+            font-size: 22px;
+        }
+
+        p,
+        ul,
+        ol {
+            font-size: 17px;
+            color: #333336;
+            margin-bottom: 1.2em;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Images */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Tables (Apple Style) */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #F5F5F7;
+            font-weight: 600;
+            color: #1D1D1F;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background-color: #FAFAFA;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        code {
+            font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+        }
+
+        blockquote {
+            background: #F5F5F7;
+            border-left: 4px solid var(--accent-color);
+            margin: 1.5em 0;
+            padding: 1em 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Loading State */
+        #loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #86868B;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none;
+            }
+
+            #main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            #lang-toggle {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(10px);
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                padding: 6px 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-color);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                z-index: 100;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            #lang-toggle:hover {
+                background: white;
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar">
+        <h3>Contents</h3>
+        <nav id="toc"></nav>
+    </div>
+
+    <div id="main">
+        <button id="lang-toggle">EN / 中</button>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Moved initialization logic to bottom to ensure functions are defined
+        });
+
+        function generateTOC() {
+            const headers = document.querySelectorAll('#content h1, #content h2');
+            const tocContainer = document.getElementById('toc');
+            tocContainer.innerHTML = ''; // Clear existing TOC
+
+            headers.forEach((header, index) => {
+                // Generate ID if missing
+                if (!header.id) {
+                    header.id = 'header-' + index;
+                }
+
+                const link = document.createElement('a');
+                link.href = '#' + header.id;
+                link.textContent = header.textContent;
+
+                // Indentation based on tag name
+                if (header.tagName === 'H1') {
+                    link.className = 'indent-1';
+                    link.style.fontWeight = '600';
+                } else {
+                    link.className = 'indent-2';
+                }
+
+                link.addEventListener('click', (e) => {
+                    // Simple jump for now
+                });
+
+                tocContainer.appendChild(link);
+            });
+        }
+
+        // Language Switching Logic
+        const toggleBtn = document.getElementById('lang-toggle');
+        // Default to 'zh' if not set
+        let currentLang = localStorage.getItem('prd_lang') || 'zh';
+
+        // Map language code to file path
+        const langMap = {
+            'zh': './docs/PRD.md',
+            'en': './docs/PRD_en.md'
+        };
+
+        function updateButtonText() {
+            // If current is 'zh', button should verify switching to 'en', so show 'EN'
+            // But usually toggle buttons show current state or target state. 
+            // The requirement says "EN / 中". Let's make it intuitive.
+            // If current is Chinese, show "Switch to English" or highlight "中".
+            // Let's stick to the text "EN / 中" but maybe change content based on state?
+            // Or just static "EN / 中"? The prompt says "例如顯示 'EN / 中'".
+            // Let's make it toggle: if zh -> Show "English", if en -> Show "中文"
+            toggleBtn.textContent = currentLang === 'zh' ? 'English' : '中文';
+        }
+
+        function loadContent(lang) {
+            const filePath = langMap[lang];
+            const contentDiv = document.getElementById('content');
+
+            contentDiv.innerHTML = '<div id="loading">Loading...</div>'; // Simple loading state
+
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Could not load ${filePath}`);
+                    return response.text();
+                })
+                .then(text => {
+                    // 1. Path Correction
+                    const fixedText = text.replace(/\.\.\/assets\//g, 'assets/');
+
+                    // 2. Render Markdown
+                    contentDiv.innerHTML = marked.parse(fixedText);
+
+                    // 3. Generate Sidebar TOC
+                    generateTOC();
+                })
+                .catch(err => {
+                    contentDiv.innerHTML = `<div style="color: #FF3B30; padding: 20px; text-align: center;">
+                        <h2>Error Loading Content</h2>
+                        <p>${err.message}</p>
+                    </div>`;
+                    console.error(err);
+                });
+        }
+
+        // Initial Load
+        updateButtonText();
+        loadContent(currentLang);
+
+        // Event Listener
+        toggleBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('prd_lang', currentLang);
+            updateButtonText();
+            loadContent(currentLang);
+        });
+    </script>
+</body>
+
+</html>

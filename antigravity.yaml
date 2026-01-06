@@ -21,13 +21,23 @@ instructions: |
   2. 格式請遵循： <type>: <描述> (例如 feat: 新增功能)。
   3. **語言要求**：描述部分必須嚴格使用「繁體中文」。
   4. 內容要簡明扼要，說明「改了什麼」以及「為什麼改」。
-  
+
   【圖表規範】
   1. 優先使用 Markdown 表格整理數據與清單。
   2. 針對複雜邏輯或時程，請使用 Mermaid 語法繪製流程圖或甘特圖。
   3. 圖片引用請統一連結至 ./assets/ 資料夾。
 
+  【翻譯同步機制】
+  每次更新 `docs/PRD.md` 後，請務必詢問我：「是否要同步更新英文版 PRD？」
+  或者若我要求「同步翻譯」，請自動更新 `docs/PRD_en.md`。
+
 # 這裡是權限控管 (Security)
 permissions:
-  read: ["./inputs/*", "./README.md"]
-  write: ["./docs/PRD.md", "./docs/CHANGELOG.md"]
+permissions:
+  read: ["./inputs/*", "./README.md", "./docs/*", "./assets/*"]
+  write: 
+    - "./docs/PRD.md"
+    - "./docs/PRD_en.md"  # 新增：允許寫入英文版
+    - "./docs/CHANGELOG.md"
+    - "./index.html"  # 新增：允許寫入首頁檢視器
+    - "./inputs/*"
