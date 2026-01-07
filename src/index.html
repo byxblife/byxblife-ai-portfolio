@@ -15,9 +15,10 @@
         <div class="nav-content">
             <a href="#hero" class="logo">Brian.</a>
             <div class="nav-links">
-                <a href="#about">About</a>
-                <a href="#portfolio">Work</a>
-                <a href="#contact">Contact</a>
+                <a href="#about" data-i18n="nav.about">About</a>
+                <a href="#portfolio" data-i18n="nav.work">Work</a>
+                <a href="#contact" data-i18n="nav.contact">Contact</a>
+                <button class="lang-btn" id="lang-toggle">EN</button>
             </div>
         </div>
     </nav>
@@ -25,8 +26,9 @@
     <!-- Hero Section -->
     <section id="hero" class="hero-section">
         <div class="hero-content fade-in-up">
-            <h1 class="hero-title">Designing Intelligence.</h1>
-            <p class="hero-subtitle">Specializing in Advanced Agentic AI & Minimalist Engineering.</p>
+            <h1 class="hero-title" data-i18n="hero.title">Designing Intelligence.</h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">Specializing in Advanced Agentic AI & Minimalist
+                Engineering.</p>
         </div>
         <div class="scroll-indicator fade-in-delay">
             <div class="mouse">
@@ -38,23 +40,23 @@
     <!-- About Section -->
     <section id="about" class="section-container">
         <div class="content-wrapper reveal">
-            <h2 class="section-title">About Me</h2>
+            <h2 class="section-title" data-i18n="about.title">About Me</h2>
             <div class="about-grid">
                 <div class="about-text">
-                    <p>I build bridges between complex AI models and elegant user experiences. With a deep focus on
-                        **Large Language Models (LLMs)** and **Agentic Workflows**, I create solutions that are not just
-                        smart, but intuitive throughout.</p>
-                    <p>My philosophy is simple: Complexity should be invisible. The user sees beauty; the system handles
-                        the rest.</p>
+                    <p data-i18n="about.text1">I build bridges between complex AI models and elegant user experiences.
+                        With a deep focus on **Large Language Models (LLMs)** and **Agentic Workflows**, I create
+                        solutions that are not just smart, but intuitive throughout.</p>
+                    <p data-i18n="about.text2">My philosophy is simple: Complexity should be invisible. The user sees
+                        beauty; the system handles the rest.</p>
                 </div>
                 <div class="about-stats">
                     <div class="stat-item glass-card">
                         <span class="stat-number">5+</span>
-                        <span class="stat-label">Years Exp</span>
+                        <span class="stat-label" data-i18n="about.stats.exp">Years Exp</span>
                     </div>
                     <div class="stat-item glass-card">
                         <span class="stat-number">20+</span>
-                        <span class="stat-label">Projects</span>
+                        <span class="stat-label" data-i18n="about.stats.projects">Projects</span>
                     </div>
                 </div>
             </div>
@@ -64,14 +66,15 @@
     <!-- Portfolio Section -->
     <section id="portfolio" class="section-container">
         <div class="content-wrapper">
-            <h2 class="section-title reveal">Selected Works</h2>
+            <h2 class="section-title reveal" data-i18n="portfolio.title">Selected Works</h2>
             <div class="portfolio-grid">
                 <!-- Project 1 -->
                 <a href="#" class="project-card glass-card reveal">
                     <div class="card-image placeholder-image"></div>
                     <div class="card-content">
-                        <h3 class="project-title">Agentic Workflow Engine</h3>
-                        <p class="project-desc">A high-performance orchestration engine for autonomous AI agents.</p>
+                        <h3 class="project-title" data-i18n="portfolio.p1.title">Agentic Workflow Engine</h3>
+                        <p class="project-desc" data-i18n="portfolio.p1.desc">A high-performance orchestration engine
+                            for autonomous AI agents.</p>
                         <span class="project-tag">Python / LLM</span>
                     </div>
                 </a>
@@ -79,8 +82,9 @@
                 <a href="#" class="project-card glass-card reveal delay-100">
                     <div class="card-image placeholder-image"></div>
                     <div class="card-content">
-                        <h3 class="project-title">Smart Code Assistant</h3>
-                        <p class="project-desc">VS Code extension integrating Gemini Pro for real-time refactoring.</p>
+                        <h3 class="project-title" data-i18n="portfolio.p2.title">Smart Code Assistant</h3>
+                        <p class="project-desc" data-i18n="portfolio.p2.desc">VS Code extension integrating Gemini Pro
+                            for real-time refactoring.</p>
                         <span class="project-tag">TypeScript / VS Code API</span>
                     </div>
                 </a>
@@ -88,8 +92,9 @@
                 <a href="#" class="project-card glass-card reveal delay-200">
                     <div class="card-image placeholder-image"></div>
                     <div class="card-content">
-                        <h3 class="project-title">Vision Analysis Pipeline</h3>
-                        <p class="project-desc">Serverless architecture for processing biological imagery datasets.</p>
+                        <h3 class="project-title" data-i18n="portfolio.p3.title">Vision Analysis Pipeline</h3>
+                        <p class="project-desc" data-i18n="portfolio.p3.desc">Serverless architecture for processing
+                            biological imagery datasets.</p>
                         <span class="project-tag">Computer Vision / AWS</span>
                     </div>
                 </a>
@@ -100,8 +105,8 @@
     <!-- Footer -->
     <footer id="contact" class="footer-section">
         <div class="footer-content reveal">
-            <h2 class="footer-title">Let's Connect.</h2>
-            <p class="footer-text">Open for collaborations and technical consultancy.</p>
+            <h2 class="footer-title" data-i18n="footer.title">Let's Connect.</h2>
+            <p class="footer-text" data-i18n="footer.text">Open for collaborations and technical consultancy.</p>
             <div class="social-links">
                 <a href="#" class="social-link">GitHub</a>
                 <a href="#" class="social-link">LinkedIn</a>

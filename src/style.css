@@ -1,9 +1,12 @@
 /* CSS Variables */
 :root {
-    --bg-color: #F5F5F7; /* Apple light gray background */
-    --text-primary: #1D1D1F; /* Apple almost black */
+    --bg-color: #F5F5F7;
+    /* Apple light gray background */
+    --text-primary: #1D1D1F;
+    /* Apple almost black */
     --text-secondary: #86868B;
-    --accent-color: #0071E3; /* Apple Blue */
+    --accent-color: #0071E3;
+    /* Apple Blue */
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.5);
     --glass-blur: 20px;
@@ -38,13 +41,16 @@ a {
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-weight: 600;
     letter-spacing: -0.02em;
 }
 
 .section-title {
-    font-size: 48px; /* Large, bold titles */
+    font-size: 48px;
+    /* Large, bold titles */
     margin-bottom: 60px;
     text-align: center;
 }
@@ -59,7 +65,7 @@ h1, h2, h3 {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -94,6 +100,25 @@ h1, h2, h3 {
     color: var(--accent-color);
 }
 
+.lang-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.lang-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
 /* Hero Section */
 .hero-section {
     height: 100vh;
@@ -110,6 +135,7 @@ h1, h2, h3 {
     line-height: 1.1;
     margin-bottom: 20px;
     background: linear-gradient(135deg, #1D1D1F 0%, #424245 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -129,7 +155,8 @@ h1, h2, h3 {
 }
 
 .fade-in-delay {
-    animation: fadeIn 1s ease forwards 1s; /* 1s delay */
+    animation: fadeIn 1s ease forwards 1s;
+    /* 1s delay */
     opacity: 0;
 }
 
@@ -141,7 +168,9 @@ h1, h2, h3 {
 }
 
 @keyframes fadeIn {
-    to { opacity: 1; }
+    to {
+        opacity: 1;
+    }
 }
 
 /* Scroll Indicator */
@@ -169,8 +198,15 @@ h1, h2, h3 {
 }
 
 @keyframes scroll {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(10px); opacity: 0; }
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
 }
 
 /* Layout Containers */
@@ -183,8 +219,9 @@ h1, h2, h3 {
 /* Glass Card */
 .glass-card {
     background: #FFFFFF;
-    border: 1px solid rgba(0,0,0,0.05);
-    border-radius: 24px; /* Apple-like rounded corners */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    /* Apple-like rounded corners */
     box-shadow: var(--card-shadow);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
     overflow: hidden;
@@ -319,12 +356,25 @@ h1, h2, h3 {
     transform: translateY(0);
 }
 
-.delay-100 { transition-delay: 0.1s; }
-.delay-200 { transition-delay: 0.2s; }
+.delay-100 {
+    transition-delay: 0.1s;
+}
+
+.delay-200 {
+    transition-delay: 0.2s;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
-    .header-title { font-size: 56px; }
-    .about-grid { grid-template-columns: 1fr; }
-    .section-title { font-size: 36px; }
+    .header-title {
+        font-size: 56px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-title {
+        font-size: 36px;
+    }
 }

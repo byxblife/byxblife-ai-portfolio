@@ -34,7 +34,7 @@ instructions: |
 # 這裡是權限控管 (Security)
 permissions:
 permissions:
-  read: ["./inputs/*", "./README.md", "./docs/*", "./assets/*"]
+  read: ["./inputs/*", "./README.md", "./docs/*", "./assets/*", "./src/*"]
   write: 
     - "./docs/PRD.md"
     - "./docs/PRD_en.md"  # 新增：允許寫入英文版
@@ -42,3 +42,6 @@ permissions:
     - "./index.html"  # 新增：允許寫入首頁檢視器
     - "./inputs/*"
     - "./src/*"  # 增加寫入原始碼權限
+    - "./src/index.html"
+    - "./src/script.js"
+    - "./src/style.css"
