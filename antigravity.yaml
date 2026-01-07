@@ -41,3 +41,4 @@ permissions:
     - "./docs/CHANGELOG.md"
     - "./index.html"  # 新增：允許寫入首頁檢視器
     - "./inputs/*"
+    - "./src/*"  # 增加寫入原始碼權限
