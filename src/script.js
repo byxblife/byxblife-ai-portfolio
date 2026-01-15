@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "nav.about": "關於我",
             "nav.work": "作品集",
             "nav.contact": "聯絡",
-            "hero.title": "用AI設計。",
+            "hero.title": "用AI設計",
             "hero.subtitle": "這是我用AI協作的服務內容，來呈現自己創造力想法",
             "about.title": "About Me",
             "about.text1": "我建立複雜 AI 模型與優雅使用者體驗之間的橋樑。憑藉對 **大型語言模型 (LLMs)** 和 **代理工作流 (Agentic Workflows)** 的深入研究，我創造的不僅是智慧解決方案，更是直覺的使用體驗。",

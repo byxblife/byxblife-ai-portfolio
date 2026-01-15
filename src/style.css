@@ -378,3 +378,17 @@ h3 {
         font-size: 36px;
     }
 }
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        /* 1. 縮小字體 (原本可能很大，試試看 2.5rem 或 3rem) */
+        font-size: 2.8rem !important;
+
+        /* 2. 強制不換行 (這行是關鍵) */
+        white-space: nowrap;
+
+        /* 3. 如果字還是太長，允許縮小字距一點點 */
+        letter-spacing: -1px;
+    }
+}
