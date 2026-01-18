@@ -87,6 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Dynamic Projects Count Logic
+    const projectCount = document.querySelectorAll('#portfolio .project-card').length;
+    // Update translations
+    translations.en['about.stats.n_projects'] = projectCount;
+    translations.zh['about.stats.n_projects'] = projectCount;
+
+    // Update initial display
+    const projectCountEl = document.querySelector('[data-i18n="about.stats.n_projects"]');
+    if (projectCountEl) {
+        projectCountEl.textContent = projectCount;
+    }
+
     // Language Switching Logic
     let currentLang = 'en';
     const langBtn = document.getElementById('lang-toggle');
@@ -105,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // OR we just use innerText for simple text. 
                 // Given "about.text1" has **, let's do a simple regex for bold.
                 let content = t[key];
-                if (content.includes('**')) {
+
+                // Ensure content is a string for .includes() check
+                // (Dynamic counts like n_projects might be numbers)
+                if (typeof content === 'string' && content.includes('**')) {
                     content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                     element.innerHTML = content;
                 } else {
