@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.p1.desc": "Because of work needs, I need to have meetings with colleagues in different urban areas, so I built a local time zone switching converter, allowing me to make effective meeting arrangements.",
             "portfolio.p2.title": "Phone Upgrade Calculator",
             "portfolio.p2.desc": "A depreciation calculation tool designed to help evaluate the best time to sell your phone, allowing users to determine the optimal moment for an upgrade.",
-            "portfolio.p3.title": "Vision Analysis Pipeline",
-            "portfolio.p3.desc": "Serverless architecture for processing biological imagery datasets.",
+            "portfolio.p3.title": "Snake Game",
+            "portfolio.p3.desc": "Amidst busy work, sometimes you just want to zone out. Snake is a simple game to relax your brain and shift focus.",
             "footer.title": "Let's Connect.",
             "footer.text": "Open for collaborations and technical consultancy."
         },
@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.p1.desc": "因為工作的需求會需要跟不同市區的同事開會，所以住了一個當地時區的切換轉換器，讓我可以做有效地會議安排",
             "portfolio.p2.title": "換機計算機",
             "portfolio.p2.desc": "為了要能知道最佳售出手機的時間，所以做出了這一個折價計算的工具，讓有需要的人也可以來評估何時可以將手上的手機賣出",
-            "portfolio.p3.title": "視覺分析管道",
-            "portfolio.p3.desc": "處理生物影像資料集的無伺服器架構。",
+            "portfolio.p3.title": "貪食蛇",
+            "portfolio.p3.desc": "在工作繁忙之際，有時候都還是想放空一下，就會想要玩一下舒壓的小遊戲，貪食蛇是其中一個小遊戲，簡單的操作，就可以大腦放鬆一下移轉注意力",
             "footer.title": "保持聯繫。",
             "footer.text": "歡迎洽談合作與技術諮詢。"
         }
