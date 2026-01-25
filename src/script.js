@@ -62,7 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.snake.title": "Snake Game",
             "portfolio.snake.desc": "Amidst busy work, sometimes you just want to zone out. Snake is a simple game to relax your brain and shift focus.",
             "footer.title": "Let's Connect.",
-            "footer.text": "Open for collaborations and technical consultancy."
+            "footer.text": "Open for collaborations and technical consultancy.",
+            "footer.newsletter": "Newsletter"
         },
         zh: {
             "nav.about": "關於我",
@@ -87,7 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.snake.title": "貪食蛇",
             "portfolio.snake.desc": "在工作繁忙之際，有時候都還是想放空一下，就會想要玩一下舒壓的小遊戲，貪食蛇是其中一個小遊戲，簡單的操作，就可以大腦放鬆一下移轉注意力",
             "footer.title": "保持聯繫。",
-            "footer.text": "歡迎洽談合作與技術諮詢。"
+            "footer.text": "歡迎洽談合作與技術諮詢。",
+            "footer.newsletter": "電子報"
         }
     };
 
