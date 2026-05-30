@@ -61,6 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.phone_calc.desc": "A depreciation calculation tool designed to help evaluate the best time to sell your phone, allowing users to determine the optimal moment for an upgrade.",
             "portfolio.snake.title": "Snake Game",
             "portfolio.snake.desc": "Amidst busy work, sometimes you just want to zone out. Snake is a simple game to relax your brain and shift focus.",
+            "portfolio.hyrox.title": "Hyrox Running Progress Tracker",
+            "portfolio.hyrox.desc": "A personal tracking tool built for Hyrox training. It organizes outdoor running time, distance, and pace trends to help me see whether my running ability is improving consistently.",
+            "portfolio.gym_market.title": "Cross-market Gym Dashboard",
+            "portfolio.gym_market.desc": "A dashboard that brings together public data, estimated data, and research conclusions into one interface, helping me quickly read market structure, brand patterns, and digital opportunities across different countries.",
             "footer.title": "Let's Connect.",
             "footer.text": "Open for collaborations and technical consultancy.",
             "footer.newsletter": "Newsletter"
@@ -87,6 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.phone_calc.desc": "為了要能知道最佳售出手機的時間，所以做出了這一個折價計算的工具，讓有需要的人也可以來評估何時可以將手上的手機賣出",
             "portfolio.snake.title": "貪食蛇",
             "portfolio.snake.desc": "在工作繁忙之際，有時候都還是想放空一下，就會想要玩一下舒壓的小遊戲，貪食蛇是其中一個小遊戲，簡單的操作，就可以大腦放鬆一下移轉注意力",
+            "portfolio.hyrox.title": "Hyrox跑步進步追蹤",
+            "portfolio.hyrox.desc": "這是為了 Hyrox 訓練所做的個人追蹤工具，透過整理室外跑步的時間、距離與配速變化，幫助我判斷自己的跑步能力是否有穩定成長。",
+            "portfolio.gym_market.title": "跨國健身市場儀表板",
+            "portfolio.gym_market.desc": "這是把公開資料、推估資料與研究結論整理成單一介面的儀表板，幫助我快速判讀不同國家的健身市場結構、品牌類型與數位機會。",
             "footer.title": "保持聯繫。",
             "footer.text": "歡迎洽談合作與技術諮詢。",
             "footer.newsletter": "電子報"
