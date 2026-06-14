@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Master Viewer</title>
+  <link rel="stylesheet" href="./task_master_view.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Task Management</p>
+        <h1>00_Task_Master 檢視頁</h1>
+        <p class="hero-text">用四個分頁快速檢視任務，並直接把 checkbox 同步回 Markdown。</p>
+        <div class="hero-summary" aria-label="任務總覽">
+          <div class="summary-card">
+            <span class="summary-label">全部任務</span>
+            <strong id="summary-total">0</strong>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">未勾選</span>
+            <strong id="summary-unchecked">0</strong>
+          </div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <span class="meta-label">同步檔案</span>
+          <strong id="markdown-path">讀取中...</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">最後更新</span>
+          <strong id="updated-at">讀取中...</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav id="tab-bar" class="tab-bar" aria-label="Task Master 分頁"></nav>
+
+    <main class="content-shell">
+      <section id="direct-actions" class="status-banner" hidden>
+        <button id="connect-markdown" type="button">連結 00_Task_Master.md</button>
+        <button id="reload-markdown" type="button">重新讀取 Markdown</button>
+      </section>
+      <section id="status-banner" class="status-banner" hidden></section>
+      <section id="tab-content" class="tab-content" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script src="./task_master_view_fallback.js"></script>
+  <script>
+    const POLL_INTERVAL_MS = 3000;
+    const DEFAULT_API_BASE = "http://127.0.0.1:8765";
+    const PENDING_STORAGE_KEY = "task_master_pending_changes_v1";
+
+    let activeTabId = "gantt";
+    let latestState = null;
+    let latestHash = "";
+    let liveMode = false;
+    let pollingHandle = null;
+    let toggleInFlight = false;
+    let flushInFlight = false;
+    let directWriteHandle = null;
+
+    const tabBar = document.getElementById("tab-bar");
+    const tabContent = document.getElementById("tab-content");
+    const directActions = document.getElementById("direct-actions");
+    const connectMarkdownButton = document.getElementById("connect-markdown");
+    const reloadMarkdownButton = document.getElementById("reload-markdown");
+    const statusBanner = document.getElementById("status-banner");
+    const markdownPath = document.getElementById("markdown-path");
+    const updatedAt = document.getElementById("updated-at");
+    const summaryTotal = document.getElementById("summary-total");
+    const summaryUnchecked = document.getElementById("summary-unchecked");
+
+    function getApiBase() {
+      const query = new URLSearchParams(window.location.search);
+      const customApiBase = query.get("apiBase");
+      if (customApiBase) {
+        return customApiBase.replace(/\/$/, "");
+      }
+      if (window.location.protocol === "file:") {
+        return DEFAULT_API_BASE;
+      }
+      return window.location.origin.replace(/\/$/, "");
+    }
+
+    const API_BASE = getApiBase();
+
+    function buildApiUrl(path) {
+      return `${API_BASE}${path}`;
+    }
+
+    function structuredCloneSafe(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    async function ensureHandlePermission(handle, writable = false) {
+      if (!handle || typeof handle.queryPermission !== "function") return false;
+      const options = writable ? { mode: "readwrite" } : {};
+      let permission = await handle.queryPermission(options);
+      if (permission === "granted") return true;
+      if (typeof handle.requestPermission === "function") {
+        permission = await handle.requestPermission(options);
+        return permission === "granted";
+      }
+      return false;
+    }
+
+    function supportsDirectWrite() {
+      return typeof window.showOpenFilePicker === "function";
+    }
+
+    function updateDirectActionVisibility() {
+      const shouldShow = window.location.protocol === "file:" && supportsDirectWrite();
+      directActions.hidden = !shouldShow;
+      if (shouldShow) {
+        connectMarkdownButton.disabled = toggleInFlight || flushInFlight;
+        reloadMarkdownButton.disabled = toggleInFlight || flushInFlight || !directWriteHandle;
+      }
+    }
+
+    function buildEmptyTabs() {
+      return [
+        { id: "gantt", label: "月報甘特圖", task_count: 0, checked_count: 0, blocks: [] },
+        { id: "pending", label: "未完成", task_count: 0, checked_count: 0, blocks: [] },
+        { id: "backlog", label: "backlog", task_count: 0, checked_count: 0, blocks: [] },
+        { id: "completed", label: "已完成", task_count: 0, checked_count: 0, blocks: [] }
+      ];
+    }
+
+    function splitTaskText(text) {
+      const match = text.trim().match(/^(\d{8}_\d{3})(?:_(.*))?$/);
+      if (!match) return { taskId: null, displayText: text.trim() };
+      return {
+        taskId: match[1],
+        displayText: (match[2] || match[1]).trim()
+      };
+    }
+
+    function parseMarkdownStateFromText(markdownText, markdownPathValue, updatedAtValue) {
+      const tabs = buildEmptyTabs();
+      const tabLookup = Object.fromEntries(tabs.map((tab) => [tab.id, tab]));
+      const sectionToTab = {
+        "月報甘特圖": ["gantt", "月報甘特圖"],
+        "月報": ["gantt", "月報"],
+        "未完成": ["pending", "未完成"],
+        "待追蹤": ["pending", "待追蹤"],
+        "backlog": ["backlog", "backlog"],
+        "已完成": ["completed", "已完成"]
+      };
+
+      let currentBlock = null;
+      let currentTab = null;
+      let headingStack = [];
+
+      const appendNode = (block, stack, node) => {
+        if (stack.length) {
+          stack[stack.length - 1].children.push(node);
+        } else {
+          block.nodes.push(node);
+        }
+      };
+
+      markdownText.split(/\r?\n/).forEach((rawLine, index) => {
+        const lineNumber = index + 1;
+        const topSectionMatch = rawLine.match(/^##\s+(.+)$/);
+        if (topSectionMatch) {
+          const mapped = sectionToTab[topSectionMatch[1].trim()];
+          headingStack = [];
+          currentBlock = null;
+          currentTab = null;
+          if (mapped) {
+            const [tabId, blockTitle] = mapped;
+            currentTab = tabLookup[tabId];
+            currentBlock = {
+              title: blockTitle,
+              task_count: 0,
+              checked_count: 0,
+              nodes: []
+            };
+            currentTab.blocks.push(currentBlock);
+          }
+          return;
+        }
+
+        if (!currentBlock || !currentTab) return;
+        if (!rawLine.trim() || rawLine.trim() === "---") return;
+
+        const headingMatch = rawLine.match(/^(#{3,6})\s+(.+)$/);
+        if (headingMatch) {
+          const level = headingMatch[1].length;
+          const node = {
+            type: "group",
+            title: headingMatch[2].trim(),
+            level,
+            children: []
+          };
+          while (headingStack.length && headingStack[headingStack.length - 1].level >= level) {
+            headingStack.pop();
+          }
+          appendNode(currentBlock, headingStack, node);
+          headingStack.push(node);
+          return;
+        }
+
+        const checkboxMatch = rawLine.match(/^[-*] \[([ Xx])\]\s+(.*)$/);
+        if (checkboxMatch) {
+          const checked = checkboxMatch[1].toUpperCase() === "X";
+          const fullText = checkboxMatch[2].trim();
+          const taskInfo = splitTaskText(fullText);
+          const node = {
+            type: "task",
+            text: fullText,
+            display_text: taskInfo.displayText,
+            checked,
+            task_id: taskInfo.taskId,
+            line_number: lineNumber,
+            raw_line: rawLine
+          };
+          appendNode(currentBlock, headingStack, node);
+          currentBlock.task_count += 1;
+          currentTab.task_count += 1;
+          if (checked) {
+            currentBlock.checked_count += 1;
+            currentTab.checked_count += 1;
+          }
+          return;
+        }
+
+        let noteText = rawLine.trim();
+        if (noteText.startsWith("- ") || noteText.startsWith("* ")) {
+          noteText = noteText.slice(2).trim();
+        }
+        appendNode(currentBlock, headingStack, {
+          type: "note",
+          text: noteText,
+          line_number: lineNumber,
+          raw_line: rawLine
+        });
+      });
+
+      return {
+        hash: `${markdownText.length}-${updatedAtValue || ""}`,
+        markdown_path: markdownPathValue || "00_Task_Master.md",
+        updated_at: updatedAtValue || new Date().toISOString(),
+        tabs
+      };
+    }
+
+    function getPendingChanges() {
+      try {
+        const raw = window.localStorage.getItem(PENDING_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function setPendingChanges(changes) {
+      window.localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(changes));
+    }
+
+    function pendingKeyFromPayload(payload) {
+      if (payload.task_id) return `task:${payload.task_id}`;
+      return `line:${payload.raw_line || ""}`;
+    }
+
+    function eachTaskNode(state, callback) {
+      if (!state || !state.tabs) return;
+      state.tabs.forEach((tab) => {
+        tab.blocks.forEach((block) => {
+          walkNodes(block.nodes, callback);
+        });
+      });
+    }
+
+    function walkNodes(nodes, callback) {
+      nodes.forEach((node) => {
+        if (node.type === "task") {
+          callback(node);
+          return;
+        }
+        if (node.type === "group" && Array.isArray(node.children)) {
+          walkNodes(node.children, callback);
+        }
+      });
+    }
+
+    function taskMatchesPayload(node, payload) {
+      if (payload.task_id) {
+        return node.task_id === payload.task_id;
+      }
+      return node.raw_line === payload.raw_line;
+    }
+
+    function recalculateCounts(state) {
+      if (!state || !state.tabs) return;
+      state.tabs.forEach((tab) => {
+        let tabTaskCount = 0;
+        let tabCheckedCount = 0;
+        tab.blocks.forEach((block) => {
+          let blockTaskCount = 0;
+          let blockCheckedCount = 0;
+          walkNodes(block.nodes, (node) => {
+            blockTaskCount += 1;
+            if (node.checked) blockCheckedCount += 1;
+          });
+          block.task_count = blockTaskCount;
+          block.checked_count = blockCheckedCount;
+          tabTaskCount += blockTaskCount;
+          tabCheckedCount += blockCheckedCount;
+        });
+        tab.task_count = tabTaskCount;
+        tab.checked_count = tabCheckedCount;
+      });
+    }
+
+    function applySingleChangeToState(state, payload) {
+      eachTaskNode(state, (node) => {
+        if (taskMatchesPayload(node, payload)) {
+          node.checked = Boolean(payload.checked);
+        }
+      });
+      recalculateCounts(state);
+    }
+
+    function replaceCheckboxMarker(line, checked) {
+      const marker = checked ? "[X]" : "[ ]";
+      return line.replace(/^([-*]) \[[ Xx]\]/, `$1 ${marker}`);
+    }
+
+    function applyToggleToMarkdownText(markdownText, payload) {
+      const lines = markdownText.split(/\r?\n/);
+      const updatedLineNumbers = [];
+
+      if (payload.task_id) {
+        const taskPattern = new RegExp(`^[-*] \\[[ Xx]\\]\\s+${payload.task_id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:_|$)`);
+        lines.forEach((line, index) => {
+          if (taskPattern.test(line)) {
+            lines[index] = replaceCheckboxMarker(line, payload.checked);
+            updatedLineNumbers.push(index + 1);
+          }
+        });
+      } else {
+        lines.forEach((line, index) => {
+          if (line === payload.raw_line) {
+            lines[index] = replaceCheckboxMarker(line, payload.checked);
+            updatedLineNumbers.push(index + 1);
+          }
+        });
+      }
+
+      if (!updatedLineNumbers.length) {
+        throw new Error("找不到對應的任務列，請確認你選的是正確的 00_Task_Master.md。");
+      }
+
+      return {
+        text: lines.join("\n"),
+        updatedLineNumbers
+      };
+    }
+
+    function applyPendingChangesToState(state) {
+      const pendingChanges = getPendingChanges();
+      Object.values(pendingChanges).forEach((payload) => {
+        applySingleChangeToState(state, payload);
+      });
+    }
+
+    function pendingCount() {
+      return Object.keys(getPendingChanges()).length;
+    }
+
+    function savePendingChange(payload) {
+      const changes = getPendingChanges();
+      changes[pendingKeyFromPayload(payload)] = payload;
+      setPendingChanges(changes);
+    }
+
+    function removePendingChange(payload) {
+      const changes = getPendingChanges();
+      delete changes[pendingKeyFromPayload(payload)];
+      setPendingChanges(changes);
+    }
+
+    async function pickDirectWriteHandle(options = {}) {
+      const { writable = false, forceRepick = false } = options;
+
+      if (directWriteHandle && !forceRepick) {
+        if (!writable) return directWriteHandle;
+        const granted = await ensureHandlePermission(directWriteHandle, true);
+        if (granted) return directWriteHandle;
+      }
+
+      if (!supportsDirectWrite()) return null;
+
+      const handles = await window.showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: "Markdown",
+            accept: {
+              "text/markdown": [".md"],
+              "text/plain": [".md"]
+            }
+          }
+        ]
+      });
+
+      const handle = handles && handles[0];
+      if (!handle) return null;
+      if (handle.name !== "00_Task_Master.md") {
+        throw new Error("請選擇同資料夾內的 00_Task_Master.md。");
+      }
+      if (writable) {
+        const granted = await ensureHandlePermission(handle, true);
+        if (!granted) {
+          throw new Error("尚未取得這個 Markdown 檔案的寫入權限。");
+        }
+      }
+      directWriteHandle = handle;
+      return directWriteHandle;
+    }
+
+    async function readStateFromDirectHandle(handle) {
+      const file = await handle.getFile();
+      const sourceText = await file.text();
+      latestState = parseMarkdownStateFromText(
+        sourceText,
+        handle.name || "00_Task_Master.md",
+        file.lastModified ? new Date(file.lastModified).toISOString() : new Date().toISOString()
+      );
+      applyPendingChangesToState(latestState);
+      latestHash = latestState.hash;
+      liveMode = false;
+      render();
+      updateDirectActionVisibility();
+    }
+
+    async function refreshStateFromDirectHandle() {
+      const handle = directWriteHandle;
+      if (!handle) return false;
+      try {
+        await readStateFromDirectHandle(handle);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function syncPayloadDirectlyToMarkdown(payload) {
+      let handle = await pickDirectWriteHandle({ writable: true, forceRepick: false });
+      if (!handle) {
+        handle = await pickDirectWriteHandle({ writable: true, forceRepick: true });
+      }
+      if (!handle) {
+        throw new Error("沒有選到 Markdown 檔案。");
+      }
+
+      const file = await handle.getFile();
+      const sourceText = await file.text();
+      const result = applyToggleToMarkdownText(sourceText, payload);
+
+      const writable = await handle.createWritable();
+      await writable.write(result.text);
+      await writable.close();
+
+      await readStateFromDirectHandle(handle);
+      removePendingChange(payload);
+      return result;
+    }
+
+    function showStatus(message, kind = "info") {
+      statusBanner.hidden = false;
+      statusBanner.dataset.kind = kind;
+      statusBanner.textContent = message;
+    }
+
+    function clearStatus() {
+      statusBanner.hidden = true;
+      statusBanner.textContent = "";
+      delete statusBanner.dataset.kind;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "未知";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat("zh-TW", {
+        dateStyle: "medium",
+        timeStyle: "medium"
+      }).format(date);
+    }
+
+    function createElement(tagName, className, text) {
+      const element = document.createElement(tagName);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function renderTaskNode(node) {
+      const wrapper = createElement("label", "task-row");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = Boolean(node.checked);
+      checkbox.disabled = toggleInFlight || flushInFlight;
+      checkbox.dataset.task = "true";
+      checkbox.dataset.taskId = node.task_id || "";
+      checkbox.dataset.rawLine = node.raw_line || "";
+      checkbox.dataset.lineNumber = String(node.line_number || "");
+      checkbox.addEventListener("change", handleToggle);
+
+      const body = createElement("span", "task-body");
+      if (node.task_id) {
+        body.appendChild(createElement("span", "task-id", node.task_id));
+      }
+      body.appendChild(createElement("span", "task-text", node.display_text || node.text));
+
+      wrapper.appendChild(checkbox);
+      wrapper.appendChild(body);
+      return wrapper;
+    }
+
+    function renderNoteNode(node) {
+      const note = createElement("div", "note-row", node.text);
+      return note;
+    }
+
+    function renderGroupNode(node) {
+      const section = createElement("section", `group-card level-${node.level}`);
+      const headingTag = node.level <= 3 ? "h3" : node.level === 4 ? "h4" : "h5";
+      section.appendChild(createElement(headingTag, "group-title", node.title));
+
+      const children = createElement("div", "group-children");
+      node.children.forEach((child) => {
+        children.appendChild(renderNode(child));
+      });
+      section.appendChild(children);
+      return section;
+    }
+
+    function renderNode(node) {
+      if (node.type === "group") return renderGroupNode(node);
+      if (node.type === "task") return renderTaskNode(node);
+      return renderNoteNode(node);
+    }
+
+    function renderBlock(block) {
+      const card = createElement("section", "block-card");
+      const header = createElement("div", "block-header");
+      header.appendChild(createElement("h2", "block-title", block.title));
+
+      const summary = createElement(
+        "p",
+        "block-summary",
+        `${liveMode ? "即時模式" : "離線快照"} · 共 ${block.task_count} 項，已勾選 ${block.checked_count} 項`
+      );
+
+      card.appendChild(header);
+      card.appendChild(summary);
+
+      const body = createElement("div", "block-body");
+      block.nodes.forEach((node) => {
+        body.appendChild(renderNode(node));
+      });
+      card.appendChild(body);
+      return card;
+    }
+
+    function renderTabs() {
+      tabBar.innerHTML = "";
+      latestState.tabs.forEach((tab) => {
+        const button = createElement("button", "tab-button");
+        button.type = "button";
+        button.dataset.tabId = tab.id;
+        if (tab.id === activeTabId) button.dataset.active = "true";
+        button.addEventListener("click", () => {
+          activeTabId = tab.id;
+          render();
+        });
+
+        const label = createElement("span", "tab-label", tab.label);
+        const count = createElement(
+          "span",
+          "tab-count",
+          `${tab.checked_count}/${tab.task_count}`
+        );
+
+        button.appendChild(label);
+        button.appendChild(count);
+        tabBar.appendChild(button);
+      });
+    }
+
+    function renderContent() {
+      tabContent.innerHTML = "";
+      const activeTab = latestState.tabs.find((tab) => tab.id === activeTabId) || latestState.tabs[0];
+      if (!activeTab) return;
+
+      if (!latestState.tabs.some((tab) => tab.id === activeTabId)) {
+        activeTabId = activeTab.id;
+      }
+
+      activeTab.blocks.forEach((block) => {
+        tabContent.appendChild(renderBlock(block));
+      });
+    }
+
+    function render() {
+      if (!latestState) return;
+      const totals = latestState.tabs.reduce((accumulator, tab) => {
+        accumulator.total += tab.task_count || 0;
+        accumulator.checked += tab.checked_count || 0;
+        return accumulator;
+      }, { total: 0, checked: 0 });
+      const unchecked = Math.max(0, totals.total - totals.checked);
+
+      markdownPath.textContent = latestState.markdown_path;
+      updatedAt.textContent = formatDateTime(latestState.updated_at);
+      summaryTotal.textContent = String(totals.total);
+      summaryUnchecked.textContent = String(unchecked);
+      renderTabs();
+      renderContent();
+      updateDirectActionVisibility();
+    }
+
+    async function connectDirectMarkdown() {
+      if (!supportsDirectWrite()) {
+        showStatus("這個瀏覽器不支援直接連結本機 Markdown。", "error");
+        return;
+      }
+
+      toggleInFlight = true;
+      updateDirectActionVisibility();
+      showStatus("請選擇 00_Task_Master.md，連結後這個頁面就能直接同步。", "info");
+      try {
+        const handle = await pickDirectWriteHandle({ writable: true, forceRepick: true });
+        if (!handle) {
+          throw new Error("沒有選到 Markdown 檔案。");
+        }
+        await readStateFromDirectHandle(handle);
+        showStatus("已連結 00_Task_Master.md。現在直接勾選 checkbox 就會同步回 Markdown。", "success");
+        window.setTimeout(clearStatus, 1800);
+      } catch (error) {
+        showStatus(`尚未連結 Markdown。${error.message || ""}`, "error");
+      } finally {
+        toggleInFlight = false;
+        updateDirectActionVisibility();
+      }
+    }
+
+    async function reloadDirectMarkdown() {
+      if (!directWriteHandle) {
+        showStatus("請先連結 00_Task_Master.md。", "info");
+        return;
+      }
+
+      flushInFlight = true;
+      updateDirectActionVisibility();
+      showStatus("正在重新讀取 00_Task_Master.md...", "info");
+      try {
+        const refreshed = await refreshStateFromDirectHandle();
+        if (!refreshed) {
+          throw new Error("這次無法直接讀取，請重新連結 00_Task_Master.md。");
+        }
+        showStatus("已重新讀取最新 Markdown 內容。", "success");
+        window.setTimeout(clearStatus, 1600);
+      } catch (error) {
+        directWriteHandle = null;
+        updateDirectActionVisibility();
+        showStatus(`重新讀取失敗。${error.message || ""}`, "error");
+      } finally {
+        flushInFlight = false;
+        updateDirectActionVisibility();
+      }
+    }
+
+    async function flushPendingChanges() {
+      if (!liveMode || flushInFlight) return;
+
+      const pendingChanges = Object.values(getPendingChanges());
+      if (!pendingChanges.length) return;
+
+      flushInFlight = true;
+      showStatus(`正在同步 ${pendingChanges.length} 筆離線勾選到 Markdown...`, "info");
+
+      try {
+        for (const payload of pendingChanges) {
+          const response = await fetch(buildApiUrl("/api/toggle"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json();
+          if (!response.ok || !data.ok) {
+            throw new Error(data.error || `同步失敗 (${response.status})`);
+          }
+          latestState = data.state;
+          latestHash = data.state.hash;
+          removePendingChange(payload);
+        }
+        render();
+        showStatus("離線勾選已同步回 Markdown。", "success");
+        window.setTimeout(clearStatus, 1800);
+      } catch (error) {
+        showStatus(`離線勾選尚未全部同步成功。${error.message || ""}`, "error");
+      } finally {
+        flushInFlight = false;
+        render();
+      }
+    }
+
+    async function fetchState({ quiet = false } = {}) {
+      try {
+        const response = await fetch(buildApiUrl("/api/state"), { cache: "no-store" });
+        if (!response.ok) throw new Error(`讀取狀態失敗 (${response.status})`);
+        const data = await response.json();
+        const changed = data.hash !== latestHash;
+        liveMode = true;
+        latestState = data;
+        applyPendingChangesToState(latestState);
+        latestHash = data.hash;
+        render();
+        await flushPendingChanges();
+        if (!quiet && changed) {
+          showStatus("已同步最新 Markdown 內容。", "success");
+          window.setTimeout(clearStatus, 1400);
+        }
+      } catch (error) {
+        liveMode = false;
+        if (latestState) {
+          applyPendingChangesToState(latestState);
+        }
+        render();
+        const isFileMode = window.location.protocol === "file:";
+        const hasFallback = Boolean(window.__TASK_MASTER_FALLBACK__);
+        const errorDetail = error && error.message ? `（${error.message}）` : "";
+        const pendingText = pendingCount() ? ` 目前有 ${pendingCount()} 筆勾選暫存在本機。` : "";
+        const fallbackMessage = hasFallback
+          ? `目前顯示離線快照。若你是直接雙擊開啟 HTML，請先按「連結 00_Task_Master.md」，之後這個頁面內的勾選就能直接同步。若要自動更新與跨瀏覽器更穩定同步，仍可啟動 task_master_view.command 或 python3 task_master_sync.py。${isFileMode ? ` 本頁預設會連到 ${API_BASE}。` : ""}${pendingText}${errorDetail}`
+          : `讀取資料失敗。請先啟動 task_master_view.command 或 python3 task_master_sync.py。${isFileMode ? ` 本頁會連到 ${API_BASE}。` : ""}${pendingText}${errorDetail}`;
+        showStatus(fallbackMessage, hasFallback ? "info" : "error");
+      }
+    }
+
+    async function handleToggle(event) {
+      const checkbox = event.currentTarget;
+      if (toggleInFlight || flushInFlight) {
+        checkbox.checked = !checkbox.checked;
+        return;
+      }
+
+      const payload = {
+        checked: checkbox.checked,
+        task_id: checkbox.dataset.taskId || null,
+        raw_line: checkbox.dataset.rawLine || "",
+        line_number: Number(checkbox.dataset.lineNumber || "0")
+      };
+
+      applySingleChangeToState(latestState, payload);
+      render();
+
+      if (!liveMode) {
+        if (supportsDirectWrite()) {
+          toggleInFlight = true;
+          showStatus("正在連接本機 Markdown，準備直接寫回...", "info");
+          try {
+            await syncPayloadDirectlyToMarkdown(payload);
+            render();
+            showStatus("已直接同步到本機 Markdown。", "success");
+            window.setTimeout(clearStatus, 1600);
+            return;
+          } catch (error) {
+            savePendingChange(payload);
+            render();
+            directWriteHandle = null;
+            updateDirectActionVisibility();
+            showStatus(`目前未能直接寫回 Markdown，已先暫存在本機。請再按一次「連結 00_Task_Master.md」後重試。${error.message || ""}`, "error");
+            return;
+          } finally {
+            toggleInFlight = false;
+            updateDirectActionVisibility();
+          }
+        }
+
+        savePendingChange(payload);
+        showStatus(`已暫存勾選變更。此瀏覽器不支援直接寫回，之後啟動 task_master_view.command 或同步服務時，會自動回寫到 Markdown。現在累積 ${pendingCount()} 筆。`, "info");
+        return;
+      }
+
+      toggleInFlight = true;
+      showStatus("正在同步 checkbox 到 Markdown...", "info");
+
+      try {
+        const response = await fetch(buildApiUrl("/api/toggle"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || `同步失敗 (${response.status})`);
+        }
+
+        latestState = data.state;
+        latestHash = data.state.hash;
+        removePendingChange(payload);
+        render();
+        showStatus("已同步回 Markdown。", "success");
+        window.setTimeout(clearStatus, 1400);
+      } catch (error) {
+        savePendingChange(payload);
+        liveMode = false;
+        showStatus(`即時同步失敗，已改存到本機，之後會自動補同步。${error.message || ""}`, "error");
+        render();
+      } finally {
+        toggleInFlight = false;
+        updateDirectActionVisibility();
+      }
+    }
+
+    async function start() {
+      if (window.__TASK_MASTER_FALLBACK__) {
+        const fallbackSource = structuredCloneSafe(window.__TASK_MASTER_FALLBACK__);
+        latestState = typeof fallbackSource.markdown_text === "string"
+          ? parseMarkdownStateFromText(
+              fallbackSource.markdown_text,
+              fallbackSource.markdown_path,
+              fallbackSource.updated_at
+            )
+          : fallbackSource;
+        applyPendingChangesToState(latestState);
+        latestHash = latestState.hash || "";
+        liveMode = false;
+        render();
+        const pendingText = pendingCount() ? ` 目前有 ${pendingCount()} 筆勾選暫存在本機。` : "";
+        const directWriteText = supportsDirectWrite()
+          ? " 直接雙擊 HTML 後，先按「連結 00_Task_Master.md」，接著就能直接勾選同步。"
+          : "";
+        showStatus(`已載入離線快照。若要即時同步，請啟動 task_master_view.command。${pendingText}${directWriteText}`, "info");
+      }
+      await fetchState({ quiet: true });
+      connectMarkdownButton.addEventListener("click", connectDirectMarkdown);
+      reloadMarkdownButton.addEventListener("click", reloadDirectMarkdown);
+      updateDirectActionVisibility();
+      if (pollingHandle) window.clearInterval(pollingHandle);
+      pollingHandle = window.setInterval(() => {
+        if (!toggleInFlight && !flushInFlight) {
+          if (!liveMode && directWriteHandle) {
+            refreshStateFromDirectHandle();
+            return;
+          }
+          fetchState({ quiet: true });
+        }
+      }, POLL_INTERVAL_MS);
+    }
+
+    start();
+  </script>
+</body>
+</html>

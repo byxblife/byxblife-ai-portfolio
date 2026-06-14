@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.hyrox.desc": "A personal tracking tool built for Hyrox training. It organizes outdoor running time, distance, and pace trends to help me see whether my running ability is improving consistently.",
             "portfolio.gym_market.title": "Cross-market Gym Dashboard",
             "portfolio.gym_market.desc": "A dashboard that brings together public data, estimated data, and research conclusions into one interface, helping me quickly read market structure, brand patterns, and digital opportunities across different countries.",
+            "portfolio.typekb.title": "A Gentle Typing Companion",
+            "portfolio.typekb.desc": "A calming typing experience that uses music, daily themes, and gentle interactions to help people pause and unwind during a busy day.",
             "footer.title": "Let's Connect.",
             "footer.text": "Open for collaborations and technical consultancy.",
             "footer.newsletter": "Newsletter"
@@ -95,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.hyrox.desc": "這是為了 Hyrox 訓練所做的個人追蹤工具，透過整理室外跑步的時間、距離與配速變化，幫助我判斷自己的跑步能力是否有穩定成長。",
             "portfolio.gym_market.title": "跨國健身市場儀表板",
             "portfolio.gym_market.desc": "這是把公開資料、推估資料與研究結論整理成單一介面的儀表板，幫助我快速判讀不同國家的健身市場結構、品牌類型與數位機會。",
+            "portfolio.typekb.title": "陪伴療癒打字機",
+            "portfolio.typekb.desc": "這是一個用音樂、主題與柔和打字互動，幫助人在忙碌之中短暫放鬆與沉澱的工具。",
             "footer.title": "保持聯繫。",
             "footer.text": "歡迎洽談合作與技術諮詢。",
             "footer.newsletter": "電子報"
