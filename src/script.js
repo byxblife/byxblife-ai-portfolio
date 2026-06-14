@@ -118,11 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Language Switching Logic
+    const LANG_STORAGE_KEY = 'portfolio_lang';
     let currentLang = 'en';
     const langBtn = document.getElementById('lang-toggle');
 
     function switchLanguage(lang) {
         currentLang = lang;
+        window.localStorage.setItem(LANG_STORAGE_KEY, lang);
         const t = translations[lang];
 
         // Update Text
@@ -162,6 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Optional: Auto-detect browser language?
-    // For now, default to English as per request logic "Default EN"
+    const savedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+    switchLanguage(savedLang === 'zh' ? 'zh' : 'en');
 });
