@@ -67,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.gym_market.desc": "A dashboard that brings together public data, estimated data, and research conclusions into one interface, helping me quickly read market structure, brand patterns, and digital opportunities across different countries.",
             "portfolio.typekb.title": "A Gentle Typing Companion",
             "portfolio.typekb.desc": "A calming typing experience that uses music, daily themes, and gentle interactions to help people pause and unwind during a busy day.",
+            "portfolio.reading_note.title": "Reading Notes",
+            "portfolio.reading_note.desc": "A timeline-based reading notebook that organizes historical events and ideas, helping me explore how knowledge connects across time.",
             "footer.title": "Let's Connect.",
             "footer.text": "Open for collaborations and technical consultancy.",
             "footer.newsletter": "Newsletter"
@@ -99,6 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "portfolio.gym_market.desc": "這是把公開資料、推估資料與研究結論整理成單一介面的儀表板，幫助我快速判讀不同國家的健身市場結構、品牌類型與數位機會。",
             "portfolio.typekb.title": "陪伴療癒打字機",
             "portfolio.typekb.desc": "這是一個用音樂、主題與柔和打字互動，幫助人在忙碌之中短暫放鬆與沉澱的工具。",
+            "portfolio.reading_note.title": "下班後的補給",
+            "portfolio.reading_note.desc": "把閱讀時記下的歷史事件與知識整理到時間軸上，讓我可以沿著年代探索，重新看見不同知識之間的連結。",
             "footer.title": "保持聯繫。",
             "footer.text": "歡迎洽談合作與技術諮詢。",
             "footer.newsletter": "電子報"
